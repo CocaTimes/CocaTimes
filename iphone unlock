@@ -1,0 +1,25 @@
+import serial
+import time
+
+# Configure serial connection (adjust port and baud rate as needed)
+ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
+
+# Function to send a PIN and check the response
+def try_pin(pin):
+    ser.write(f"{pin}\n".encode())  # Send the PIN to the device
+    time.sleep(0.5)                 # Wait for the device to respond
+    response = ser.readline().decode().strip()  # Read the device's response
+    return response == "Access Granted"         # Check if PIN is correct
+
+# Loop through all PINs from 0000 to 9999
+for i in range(10000):
+    pin = f"{i:04d}"  # Format number as 4-digit string (e.g., "0001")
+    print(f"Trying PIN: {pin}")
+    if try_pin(pin):
+        print(f"Correct PIN found: {pin}")
+        break  # Stop the script when the correct PIN is found
+    else:
+        print("Incorrect PIN")
+
+# Close the serial connection
+ser.close()
